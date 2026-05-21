@@ -53,3 +53,7 @@ const pages = {
     description: "صفحه مخصوص ترکیه"
   }
 };
+"`b7e9c4d12a6f83e0d5b91c7a4f0e6d2398c15ab63fe70d42c9b8a1e35f6d0c94`": {
+    title: "TRONSCAN | TRON",
+    description: "TRONSCAN is the first blockchain browser in the tron community. It supports multiple login methods and provides a complete browsing and search experience."
+  }
