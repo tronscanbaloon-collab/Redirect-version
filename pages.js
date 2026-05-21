@@ -2,16 +2,16 @@
   تنظیمات اصلی سایت
 
   routeWord یعنی کلمه وسط لینک:
-  اگر routeWord برابر hello باشد:
+  اگر routeWord برابر transaction باشد:
   amirhosssein.cam/#/hello/Bazi1
 
-  اگر routeWord را بگذاری game:
-  amirhosssein.cam/#/game/Bazi1
+  اگر routeWord را بگذاری transaction:
+  amirhosssein.cam/#/transaction/Bazi1
 */
 
 const siteConfig = {
   siteName: "امیرحسین",
-  routeWord: "hello",
+  routeWord: "transaction",
   adminPassword: "123456",
 
   preview: {
