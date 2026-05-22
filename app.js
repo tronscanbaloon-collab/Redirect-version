@@ -1,272 +1,375 @@
+// =============================================
+//  TRONSCAN - app.js
+// =============================================
+
 const app = document.getElementById("app");
-const storageKey = "tronscan_custom_pages";
+const PAGES_KEY     = "tronscan_custom_pages";
+const REDIRECTS_KEY = "tronscan_redirects";
 
+// ---------- Storage helpers ----------
 function getSavedPages() {
-  try {
-    return JSON.parse(localStorage.getItem(storageKey)) || {};
-  } catch {
-    return {};
-  }
+  try { return JSON.parse(localStorage.getItem(PAGES_KEY)) || {}; } catch { return {}; }
 }
-
 function saveCustomPage(slug, page) {
-  const saved = getSavedPages();
-  saved[slug] = page;
-  localStorage.setItem(storageKey, JSON.stringify(saved, null, 2));
+  const s = getSavedPages(); s[slug] = page;
+  localStorage.setItem(PAGES_KEY, JSON.stringify(s, null, 2));
 }
-
 function deleteCustomPage(slug) {
-  const saved = getSavedPages();
-  delete saved[slug];
-  localStorage.setItem(storageKey, JSON.stringify(saved, null, 2));
+  const s = getSavedPages(); delete s[slug];
+  localStorage.setItem(PAGES_KEY, JSON.stringify(s, null, 2));
 }
+function allPages() { return { ...pages, ...getSavedPages() }; }
 
-function allPages() {
-  return { ...pages, ...getSavedPages() };
+function getSavedRedirects() {
+  try { return JSON.parse(localStorage.getItem(REDIRECTS_KEY)) || {}; } catch { return {}; }
 }
+function saveRedirect(from, to) {
+  const s = getSavedRedirects(); s[from] = to;
+  localStorage.setItem(REDIRECTS_KEY, JSON.stringify(s, null, 2));
+}
+function deleteRedirect(from) {
+  const s = getSavedRedirects(); delete s[from];
+  localStorage.setItem(REDIRECTS_KEY, JSON.stringify(s, null, 2));
+}
+function allRedirects() { return { ...redirects, ...getSavedRedirects() }; }
 
+// ---------- Helpers ----------
 function makeUrl(slug) {
   return `${window.location.origin}/#/${siteConfig.routeWord}/${encodeURIComponent(slug)}`;
 }
-
+function makeRedirectUrl(from) {
+  return `${window.location.origin}${from}`;
+}
 function copyText(text) {
-  navigator.clipboard.writeText(text);
-  alert("کپی شد ✓");
+  navigator.clipboard.writeText(text).then(() => toast("کپی شد ✓"));
+}
+function toast(msg) {
+  const t = document.createElement("div");
+  t.className = "toast"; t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.classList.add("show"), 10);
+  setTimeout(() => { t.classList.remove("show"); setTimeout(() => t.remove(), 300); }, 2200);
 }
 
-function pageToJsBlock(slug, page) {
-  return `"${slug}": {
-    title: "${page.title.replaceAll('"', '\\"')}",
-    description: "${page.description.replaceAll('"', '\\"')}",
-    amount: ${page.amount || 0},
-    count: ${page.count || 1}
-  }`;
+// ---------- Auth ----------
+function isLoggedIn() { return localStorage.getItem("tronscan_admin") === "yes"; }
+function login(pw) {
+  if (pw === siteConfig.adminPassword) {
+    localStorage.setItem("tronscan_admin", "yes"); renderAdmin();
+  } else { toast("رمز اشتباه است ✗"); }
 }
+function logout() { localStorage.removeItem("tronscan_admin"); route(); }
 
+// ============================================================
+//  RENDER: LANDING
+// ============================================================
 function renderLanding() {
   app.innerHTML = `
-    <section class="hero">
-      <div class="hero-card">
-        <div class="badge">${siteConfig.landing.badge}</div>
-        <img class="logo" src="https://tronscan.org/favicon.png?v=2" alt="TRONSCAN">
-        <h1>${siteConfig.landing.title}</h1>
-        <p>${siteConfig.landing.subtitle}</p>
-        <div class="actions">
-          <a class="btn primary" href="#/admin">ورود به پنل ادمین</a>
-          <a class="btn" href="#/${siteConfig.routeWord}/b7e9c4d12a6f83e0d5b91c7a4f0e6d2398c15ab63fe70d42c9b8a1e35f6d0c94">نمونه لینک</a>
+    <div class="page-center">
+      <div class="glass-card hero-card">
+        <div class="hero-glow"></div>
+        <img class="hero-logo" src="https://tronscan.org/favicon.png?v=2" alt="TRONSCAN">
+        <span class="chip">${siteConfig.landing.badge}</span>
+        <h1 class="hero-title">${siteConfig.landing.title}</h1>
+        <p class="hero-sub">${siteConfig.landing.subtitle}</p>
+        <div class="btn-row">
+          <a class="btn btn-primary" href="#/admin">ورود به پنل ادمین</a>
+          <a class="btn btn-ghost" href="#/${siteConfig.routeWord}/b7e9c4d12a6f83e0d5b91c7a4f0e6d2398c15ab63fe70d42c9b8a1e35f6d0c94">نمونه تراکنش</a>
         </div>
       </div>
-    </section>
-  `;
+    </div>`;
 }
 
+// ============================================================
+//  RENDER: TRANSACTION PAGE
+// ============================================================
 function renderRoutePage(slug) {
   const page = allPages()[slug];
-
   if (!page) {
     app.innerHTML = `
-      <section class="simple-page">
-        <div class="panel">
-          <h1>تراکنش پیدا نشد</h1>
-          <p>این هش تراکنش در سیستم ثبت نشده است.</p>
-          <a class="btn primary" href="/">بازگشت به خانه</a>
+      <div class="page-center">
+        <div class="glass-card text-center">
+          <div class="icon-circle icon-red">✕</div>
+          <h2>تراکنش پیدا نشد</h2>
+          <p class="muted">این هش تراکنش در سیستم ثبت نشده است.</p>
+          <a class="btn btn-primary" href="/">بازگشت به خانه</a>
         </div>
-      </section>
-    `;
+      </div>`;
     return;
   }
-
   app.innerHTML = `
-    <section class="simple-page">
-      <div class="panel">
-        <div class="badge">Transaction / ${slug.substring(0, 16)}...</div>
-        <h1>${page.title}</h1>
-        <p>${page.description}</p>
-
-        <div class="trx-info">
-          <div class="trx-field">
+    <div class="page-center">
+      <div class="glass-card text-center">
+        <div class="icon-circle icon-green">✓</div>
+        <span class="chip chip-mono">${slug.substring(0,12)}...${slug.slice(-6)}</span>
+        <h2>${page.title}</h2>
+        <p class="muted">${page.description}</p>
+        <div class="trx-row">
+          <div class="trx-box">
             <span class="trx-label">مبلغ TRX</span>
-            <span class="trx-value">${(page.amount || 0).toLocaleString()} <b>TRX</b></span>
+            <span class="trx-val">${(page.amount||0).toLocaleString()}<b>TRX</b></span>
           </div>
-          <div class="trx-field">
+          <div class="trx-box">
             <span class="trx-label">تعداد تراکنش</span>
-            <span class="trx-value">${page.count || 1} <b>عدد</b></span>
+            <span class="trx-val">${page.count||1}<b>عدد</b></span>
           </div>
         </div>
-
-        <div class="actions">
-          <button class="btn primary" onclick="copyText('${makeUrl(slug)}')">کپی لینک</button>
-          <a class="btn" href="/">خانه</a>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="copyText('${makeUrl(slug)}')">کپی لینک</button>
+          <a class="btn btn-ghost" href="/">خانه</a>
         </div>
       </div>
-    </section>
-  `;
+    </div>`;
 }
 
-function isLoggedIn() {
-  return localStorage.getItem("tronscan_admin_logged_in") === "yes";
-}
-
-function login(password) {
-  if (password === siteConfig.adminPassword) {
-    localStorage.setItem("tronscan_admin_logged_in", "yes");
-    renderAdmin();
-  } else {
-    alert("رمز اشتباه است");
-  }
-}
-
-function logout() {
-  localStorage.removeItem("tronscan_admin_logged_in");
-  route();
-}
-
+// ============================================================
+//  RENDER: LOGIN
+// ============================================================
 function renderLogin() {
   app.innerHTML = `
-    <section class="simple-page">
-      <div class="panel small">
-        <img class="logo" src="https://tronscan.org/favicon.png?v=2" alt="TRONSCAN">
-        <h1>ورود ادمین</h1>
-        <p>رمز پیش‌فرض داخل pages.js قابل تغییر است.</p>
-        <input id="password" type="password" placeholder="رمز ادمین">
-        <button class="btn primary full" onclick="login(document.getElementById('password').value)">ورود</button>
-        <a class="muted-link" href="/">بازگشت</a>
+    <div class="page-center">
+      <div class="glass-card text-center" style="max-width:400px">
+        <img class="hero-logo" src="https://tronscan.org/favicon.png?v=2" alt="TRONSCAN">
+        <h2>ورود ادمین</h2>
+        <p class="muted" style="margin-bottom:24px">رمز داخل pages.js قابل تغییر است.</p>
+        <input id="pw" type="password" class="input" placeholder="رمز ادمین"
+          onkeydown="if(event.key==='Enter')login(this.value)">
+        <button class="btn btn-primary full" onclick="login(document.getElementById('pw').value)">ورود</button>
+        <a class="link-muted" href="/">بازگشت</a>
       </div>
-    </section>
-  `;
+    </div>`;
 }
 
+// ============================================================
+//  RENDER: ADMIN
+// ============================================================
 function renderAdmin() {
-  const data = allPages();
-  const slugs = Object.keys(data);
+  const allP = allPages();
+  const allR = allRedirects();
+  const savedR = getSavedRedirects();
 
   app.innerHTML = `
-    <section class="admin">
+    <div class="admin-wrap">
+
+      <!-- Header -->
       <div class="admin-header">
         <div>
-          <div class="badge">Admin Panel</div>
-          <h1>مدیریت لینک‌های تراکنش TRX</h1>
-          <p>لینک تراکنش بساز، مبلغ و تعداد تعیین کن، کپی کن یا کد آماده‌اش را ذخیره کن.</p>
+          <span class="chip">Admin Panel</span>
+          <h1>مدیریت TRONSCAN</h1>
+          <p class="muted">لینک‌های تراکنش و Redirect بساز و مدیریت کن.</p>
         </div>
-        <button class="btn" onclick="logout()">خروج</button>
+        <button class="btn btn-ghost" onclick="logout()">خروج</button>
       </div>
 
-      <div class="grid">
-        <div class="panel">
-          <h2>ساخت لینک تراکنش جدید</h2>
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('transactions',this)">تراکنش‌ها</button>
+        <button class="tab" onclick="switchTab('redirects',this)">Redirect Manager</button>
+      </div>
 
-          <label>هش تراکنش (TX Hash)</label>
-          <input id="slug" placeholder="مثلاً b7e9c4d12a6f83...">
+      <!-- TAB: Transactions -->
+      <div id="tab-transactions">
+        <div class="grid-2">
 
-          <label>عنوان</label>
-          <input id="title" placeholder="مثلاً TRONSCAN | TRON BlockChain Explorer">
+          <!-- Form -->
+          <div class="glass-card">
+            <h3>ساخت لینک تراکنش</h3>
+            <label>هش تراکنش (TX Hash)</label>
+            <input id="slug" class="input" placeholder="b7e9c4d12a6f83...">
+            <label>عنوان</label>
+            <input id="title" class="input" placeholder="TRONSCAN | TRON BlockChain Explorer">
+            <label>توضیحات</label>
+            <textarea id="desc" class="input" placeholder="توضیح کوتاه تراکنش"></textarea>
+            <div class="grid-2-small">
+              <div>
+                <label>مبلغ TRX</label>
+                <input id="amount" type="number" class="input" placeholder="1000" min="0">
+              </div>
+              <div>
+                <label>تعداد تراکنش</label>
+                <input id="count" type="number" class="input" placeholder="1" min="1">
+              </div>
+            </div>
+            <button class="btn btn-primary full" onclick="createPage()">ساخت لینک ✓</button>
+            <div class="hint">فرمت: <b>tronscan.cam/#/transaction/HASH</b></div>
+          </div>
 
-          <label>توضیحات</label>
-          <textarea id="description" placeholder="توضیح کوتاه تراکنش"></textarea>
-
-          <label>مبلغ TRX</label>
-          <input id="amount" type="number" placeholder="مثلاً 1000" min="0">
-
-          <label>تعداد تراکنش</label>
-          <input id="count" type="number" placeholder="مثلاً 5" min="1">
-
-          <button class="btn primary full" onclick="createPage()">ساخت لینک تراکنش</button>
-
-          <div class="hint">
-            فرمت لینک: <b>tronscan.cam/#/transaction/HASH</b>
+          <!-- Guide -->
+          <div class="glass-card">
+            <h3>راهنمای سریع</h3>
+            <div class="guide-list">
+              <div class="guide-item">
+                <span class="guide-icon">🔑</span>
+                <div><b>تغییر رمز ادمین</b><p>مقدار <code>adminPassword</code> در pages.js</p></div>
+              </div>
+              <div class="guide-item">
+                <span class="guide-icon">🔗</span>
+                <div><b>تغییر routeWord</b><p>مقدار <code>routeWord</code> در pages.js</p></div>
+              </div>
+              <div class="guide-item">
+                <span class="guide-icon">🖼️</span>
+                <div><b>پریویو تلگرام</b><p>بخش <code>preview</code> در pages.js</p></div>
+              </div>
+              <div class="guide-item">
+                <span class="guide-icon">↪️</span>
+                <div><b>Redirect دائمی</b><p>آبجکت <code>redirects</code> در pages.js + اسکریپت inline در index.html</p></div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="panel">
-          <h2>راهنمای تنظیمات</h2>
-          <p><b>تغییر routeWord:</b> داخل <code>pages.js</code> مقدار <code>routeWord</code> را تغییر بده.</p>
-          <p><b>تغییر رمز ادمین:</b> داخل <code>pages.js</code> مقدار <code>adminPassword</code> را تغییر بده.</p>
-          <p><b>پریویو تلگرام:</b> داخل <code>pages.js</code> بخش <code>preview</code> را ویرایش کن.</p>
-          <p><b>عکس پریویو:</b> مقدار <code>preview.image</code> را در <code>pages.js</code> تغییر بده.</p>
-          <p><b>لوگوی مرورگر:</b> فایل <code>favicon.png</code> را عوض کن.</p>
+        <!-- List -->
+        <div class="glass-card" style="margin-top:20px">
+          <h3>لینک‌های ساخته‌شده</h3>
+          <div class="list">
+            ${Object.keys(allP).map(slug => `
+              <div class="list-item">
+                <div class="list-info">
+                  <b>${allP[slug].title}</b>
+                  <span class="tag-green">💰 ${(allP[slug].amount||0).toLocaleString()} TRX &nbsp;·&nbsp; 🔁 ${allP[slug].count||1} تراکنش</span>
+                  <span class="mono muted">${makeUrl(slug)}</span>
+                </div>
+                <div class="list-actions">
+                  <button class="btn-sm" onclick="copyText('${makeUrl(slug)}')">کپی</button>
+                  <a class="btn-sm" href="#/${siteConfig.routeWord}/${slug}">باز</a>
+                  <button class="btn-sm" onclick="showCode('${slug}')">کد</button>
+                  ${pages[slug] ? "" : `<button class="btn-sm btn-sm-red" onclick="removePage('${slug}')">حذف</button>`}
+                </div>
+              </div>`).join("")}
+          </div>
         </div>
+        <div id="codeBox" class="glass-card hidden" style="margin-top:20px"></div>
       </div>
 
-      <div class="panel links-panel">
-        <h2>لینک‌های ساخته‌شده</h2>
-        <div class="links">
-          ${slugs.map(slug => `
-            <div class="link-card">
-              <div>
-                <b>${data[slug].title}</b>
-                <span class="trx-meta">💰 ${(data[slug].amount || 0).toLocaleString()} TRX &nbsp;|&nbsp; 🔁 ${data[slug].count || 1} تراکنش</span>
-                <span>${makeUrl(slug)}</span>
+      <!-- TAB: Redirects -->
+      <div id="tab-redirects" class="hidden">
+        <div class="grid-2">
+
+          <!-- Form -->
+          <div class="glass-card">
+            <h3>ساخت Redirect جدید</h3>
+            <label>From (مسیر داخلی)</label>
+            <input id="r-from" class="input" placeholder="/pay">
+            <div class="hint" style="margin-bottom:14px">باید با / شروع شود. مثال: /pay /gift /go/game1</div>
+            <label>To (مقصد کامل)</label>
+            <input id="r-to" class="input" placeholder="https://tronscan.org/#/transaction/HASH">
+            <div class="hint" style="margin-bottom:14px">هر لینک کامل، حتی با # هم قبوله.</div>
+            <button class="btn btn-primary full" onclick="createRedirect()">ذخیره Redirect ✓</button>
+          </div>
+
+          <!-- Info -->
+          <div class="glass-card">
+            <h3>نحوه کار</h3>
+            <div class="guide-list">
+              <div class="guide-item">
+                <span class="guide-icon">⚡</span>
+                <div><b>فوری و بدون backend</b><p>اسکریپت inline داخل &lt;head&gt; قبل از لود هر چیزی redirect را انجام می‌دهد.</p></div>
               </div>
-              <div class="mini-actions">
-                <button onclick="copyText('${makeUrl(slug)}')">کپی لینک</button>
-                <a href="#/${siteConfig.routeWord}/${slug}">باز کردن</a>
-                <button onclick="showCode('${slug}')">کد pages.js</button>
-                ${pages[slug] ? "" : `<button onclick="removePage('${slug}')">حذف</button>`}
+              <div class="guide-item">
+                <span class="guide-icon">💾</span>
+                <div><b>ذخیره در localStorage</b><p>redirectهایی که اینجا می‌سازی در مرورگر همین دستگاه ذخیره می‌شوند.</p></div>
+              </div>
+              <div class="guide-item">
+                <span class="guide-icon">📌</span>
+                <div><b>Redirect دائمی</b><p>برای redirect روی همه دستگاه‌ها، آبجکت <code>redirects</code> در pages.js و اسکریپت inline در index.html را آپدیت کن.</p></div>
               </div>
             </div>
-          `).join("")}
+          </div>
+        </div>
+
+        <!-- List -->
+        <div class="glass-card" style="margin-top:20px">
+          <h3>لیست Redirectها</h3>
+          <div class="list">
+            ${Object.keys(allR).length === 0
+              ? `<p class="muted text-center" style="padding:20px">هنوز redirect‌ای ثبت نشده.</p>`
+              : Object.keys(allR).map(from => `
+              <div class="list-item">
+                <div class="list-info">
+                  <div class="redirect-arrow">
+                    <span class="tag-red mono">${from}</span>
+                    <span class="arrow">→</span>
+                    <span class="mono muted" style="word-break:break-all">${allR[from]}</span>
+                  </div>
+                  <span class="muted" style="font-size:11px">${makeRedirectUrl(from)}</span>
+                  ${redirects[from] && !getSavedRedirects()[from]
+                    ? `<span class="tag-blue">پیش‌فرض (pages.js)</span>`
+                    : `<span class="tag-green">localStorage</span>`}
+                </div>
+                <div class="list-actions">
+                  <button class="btn-sm" onclick="copyText('${makeRedirectUrl(from)}')">کپی لینک</button>
+                  <button class="btn-sm" onclick="copyText('${allR[from]}')">کپی مقصد</button>
+                  ${savedR[from]
+                    ? `<button class="btn-sm btn-sm-red" onclick="removeRedirect('${from}')">حذف</button>`
+                    : `<span class="muted" style="font-size:11px">حذف از pages.js</span>`}
+                </div>
+              </div>`).join("")}
+          </div>
         </div>
       </div>
 
-      <div id="codeBox" class="panel code-box hidden"></div>
-    </section>
-  `;
+    </div>`;
 }
 
+// ---------- Tab switcher ----------
+function switchTab(name, el) {
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  el.classList.add("active");
+  ["transactions","redirects"].forEach(t => {
+    document.getElementById("tab-"+t).classList.toggle("hidden", t !== name);
+  });
+}
+
+// ---------- Page actions ----------
 function createPage() {
-  const slug = document.getElementById("slug").value.trim();
-  const title = document.getElementById("title").value.trim();
-  const description = document.getElementById("description").value.trim();
+  const slug   = document.getElementById("slug").value.trim();
+  const title  = document.getElementById("title").value.trim();
+  const desc   = document.getElementById("desc").value.trim();
   const amount = parseFloat(document.getElementById("amount").value) || 0;
-  const count = parseInt(document.getElementById("count").value) || 1;
-
-  if (!slug || !title || !description) {
-    alert("لطفاً هش، عنوان و توضیحات را پر کن");
-    return;
-  }
-
-  saveCustomPage(slug, { title, description, amount, count });
+  const count  = parseInt(document.getElementById("count").value) || 1;
+  if (!slug || !title || !desc) { toast("همه فیلدها را پر کن"); return; }
+  saveCustomPage(slug, { title, description: desc, amount, count });
   renderAdmin();
+  toast("لینک ساخته شد ✓");
 }
-
 function removePage(slug) {
-  if (confirm("این تراکنش حذف شود؟")) {
-    deleteCustomPage(slug);
-    renderAdmin();
-  }
+  if (confirm("حذف شود؟")) { deleteCustomPage(slug); renderAdmin(); }
 }
-
 function showCode(slug) {
-  const page = allPages()[slug];
-  const code = pageToJsBlock(slug, page);
+  const p = allPages()[slug];
+  const code = `"${slug}": {\n    title: "${p.title}",\n    description: "${p.description}",\n    amount: ${p.amount||0},\n    count: ${p.count||1}\n  }`;
   const box = document.getElementById("codeBox");
   box.classList.remove("hidden");
-  box.innerHTML = `
-    <h2>کد آماده برای pages.js</h2>
-    <p>این کد را داخل <code>const pages</code> در فایل pages.js کپی کن تا دائمی بشه:</p>
-    <pre>${code}</pre>
-    <button class="btn primary" onclick='copyText(${JSON.stringify(code)})'>کپی کد</button>
-  `;
+  box.innerHTML = `<h3>کد آماده برای pages.js</h3>
+    <pre class="code-pre">${code}</pre>
+    <button class="btn btn-primary" onclick='copyText(${JSON.stringify(code)})'>کپی کد</button>`;
   box.scrollIntoView({ behavior: "smooth" });
 }
 
+// ---------- Redirect actions ----------
+function createRedirect() {
+  let from = document.getElementById("r-from").value.trim();
+  const to = document.getElementById("r-to").value.trim();
+  if (!from || !to) { toast("هر دو فیلد را پر کن"); return; }
+  if (!from.startsWith("/")) from = "/" + from;
+  if (!to.startsWith("http")) { toast("مقصد باید با http شروع شود"); return; }
+  saveRedirect(from, to);
+  renderAdmin();
+  switchTab("redirects", document.querySelectorAll(".tab")[1]);
+  toast("Redirect ذخیره شد ✓");
+}
+function removeRedirect(from) {
+  if (confirm("این redirect حذف شود؟")) { deleteRedirect(from); renderAdmin(); }
+}
+
+// ---------- Router ----------
 function route() {
   const hash = window.location.hash;
-
-  if (hash === "#/admin") {
-    if (isLoggedIn()) renderAdmin();
-    else renderLogin();
-    return;
-  }
-
+  if (hash === "#/admin") { isLoggedIn() ? renderAdmin() : renderLogin(); return; }
   const prefix = `#/${siteConfig.routeWord}/`;
-
   if (hash.startsWith(prefix)) {
-    const slug = decodeURIComponent(hash.replace(prefix, ""));
-    renderRoutePage(slug);
-    return;
+    renderRoutePage(decodeURIComponent(hash.replace(prefix, ""))); return;
   }
-
   renderLanding();
 }
 
