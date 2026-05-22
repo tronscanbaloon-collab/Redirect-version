@@ -16,7 +16,8 @@ const siteConfig = {
 
 const redirects = {
   "/pay":  "https://tronscan.org/#/transaction/demo1",
-  "/gift": "https://tronscan.org/#/transaction/demo2"
+  "/gift": "https://tronscan.org/#/transaction/demo2",
+  "/transaction/a8d2f0c47b91e63d5a7c4f08e2b9d1a6c53f7e90b4d18c2a6f8e3b0c19d5a74f": "https://tronscan.org/#/transaction/408a863a407afa868009a8c848ee9f675e125d0d3017f6767bf242171a0f0c6f"
 };
 
 const pages = {
