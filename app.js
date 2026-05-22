@@ -298,7 +298,7 @@ function renderAdmin() {
                 </div>
                 <div class="list-actions">
                   <button class="btn-sm" onclick="copyText('${makeRedirectUrl(from)}')">کپی لینک</button>
-                  <button class="btn-sm" onclick="copyText('${allR[from]}')">کپی مقصد</button>
+                  <button class="btn-sm" onclick="showRedirectCode('${from}', \`${allR[from]}\`)">کد دائمی</button>
                   ${savedR[from]
                     ? `<button class="btn-sm btn-sm-red" onclick="removeRedirect('${from}')">حذف</button>`
                     : `<span class="muted" style="font-size:11px">حذف از pages.js</span>`}
@@ -306,6 +306,8 @@ function renderAdmin() {
               </div>`).join("")}
           </div>
         </div>
+
+        <div id="redirectCodeBox" class="glass-card hidden" style="margin-top:20px"></div>
       </div>
 
     </div>`;
@@ -357,9 +359,36 @@ function createRedirect() {
   renderAdmin();
   switchTab("redirects", document.querySelectorAll(".tab")[1]);
   toast("Redirect ذخیره شد ✓");
+  setTimeout(() => showRedirectCode(from, to), 100);
 }
 function removeRedirect(from) {
   if (confirm("این redirect حذف شود؟")) { deleteRedirect(from); renderAdmin(); }
+}
+
+function showRedirectCode(from, to) {
+  const pagesCode  = `  "${from}": "${to}"`;
+  const inlineCode = `        "${from}": "${to}"`;
+
+  const box = document.getElementById("redirectCodeBox");
+  if (!box) return;
+  box.classList.remove("hidden");
+  box.innerHTML = `
+    <h3>کد دائمی Redirect</h3>
+    <p class="muted" style="margin-bottom:20px;font-size:13px">دو مرحله — هر کدام را جداگانه کپی کن و در فایل مربوطه paste کن:</p>
+
+    <div class="code-step">
+      <span class="code-step-label">① فایل <code>pages.js</code> — داخل آبجکت <code>redirects</code> اضافه کن</span>
+      <pre class="code-pre">${pagesCode}</pre>
+      <button class="btn btn-primary" onclick="copyText(${JSON.stringify(pagesCode)});toast('کد pages.js کپی شد ✓')">کپی — برای pages.js</button>
+    </div>
+
+    <div class="code-step" style="margin-top:16px">
+      <span class="code-step-label">② فایل <code>index.html</code> — داخل آبجکت <code>var defaults</code> اضافه کن</span>
+      <pre class="code-pre">${inlineCode}</pre>
+      <button class="btn btn-primary" onclick="copyText(${JSON.stringify(inlineCode)});toast('کد index.html کپی شد ✓')">کپی — برای index.html</button>
+    </div>
+    `;
+  box.scrollIntoView({ behavior: "smooth" });
 }
 
 // ---------- Router ----------
