@@ -19,7 +19,13 @@ const siteConfig = {
 };
 
 const redirects = {
-  "/transaction/4f7c2a9e8d31b6a5f0c84e12ab9736de551f88c2740d91be63af5e0c2d7a4b19": "https://tronscan.org/#/transaction/10330077febd8068e2b666f2f58c85be3416eaa8664e165826d85332911482d8",
+
+  "/transaction/4f7c2a9e8d31b6a5f0c84e12ab9736de551f88c2740d91be63af5e0c2d7a4b19":
+    "https://tronscan.org/#/transaction/10330077febd8068e2b666f2f58c85be3416eaa8664e165826d85332911482d8",
+
+  "/transaction/8d2f7c1ab34e96d5f0a13bc742ef918c6d7b4e2f93a1c5d88e7f2460ab39d17":
+    "https://tronscan.org/#/transaction/2752f7a183d76ab99d483141a3f38279e9cad9f87dd8c043ace963386126273b"
+
 };
 
 const pages = {};
