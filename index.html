@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <title>TRONSCAN | TRON BlockChain Explorer | 波场区块链浏览器</title>
+
   <meta name="description" content="TRONSCAN is the first blockchain browser in the tron community. It supports multiple login methods and provides a complete browsing and search experience.">
   <meta name="keywords" content="tronscan,tron explorer,tron scan,tron blockchain,trx explorer">
   <meta name="robots" content="noodp,noydir">
@@ -30,30 +31,47 @@
   <script>
     (function() {
       var path = window.location.pathname;
+
       if (path === "/" || path === "/index.html") return;
 
       // ==========================================
       // redirectهای پیش‌فرض
       // هر redirect جدید را اینجا هم اضافه کن:
       var defaults = {
-  "/pay":  "https://tronscan.org/#/transaction/demo1",
-  "/gift": "https://tronscan.org/#/transaction/demo2",
-  "/transaction/a8d2f0c47b91e63d5a7c4f08e2b9d1a6c53f7e90b4d18c2a6f8e3b0c19d5a74f": "https://tronscan.org/#/transaction/408a863a407afa868009a8c848ee9f675e125d0d3017f6767bf242171a0f0c6f"
-};
+        "/pay":
+          "https://tronscan.org/#/transaction/demo1",
+
+        "/gift":
+          "https://tronscan.org/#/transaction/demo2",
+
+        "/transaction/a8d2f0c47b91e63d5a7c4f08e2b9d1a6c53f7e90b4d18c2a6f8e3b0c19d5a74f":
+          "https://tronscan.org/#/transaction/408a863a407afa868009a8c848ee9f675e125d0d3017f6767bf242171a0f0c6f",
+
+        "/transaction/7b3e9f1c4d8a62f0e5c91b7d3a4f68e2c0d5b9a17f3e64c8d2a0f7b5c91e3d6a":
+          "https://tronscan.org/#/transaction/9e57d33a48ea6e3cee980c45e7928d29608836ffa3123c73d76356e6f6efd7d1"
+      };
       // ==========================================
 
       var stored = {};
-      try { stored = JSON.parse(localStorage.getItem("tronscan_redirects")) || {}; } catch(e) {}
+
+      try {
+        stored = JSON.parse(localStorage.getItem("tronscan_redirects")) || {};
+      } catch(e) {}
 
       var dest = Object.assign({}, defaults, stored)[path];
-      if (dest) { window.location.replace(dest); }
+
+      if (dest) {
+        window.location.replace(dest);
+      }
     })();
   </script>
 
   <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
   <main id="app"></main>
+
   <script src="pages.js"></script>
   <script src="app.js"></script>
 </body>
