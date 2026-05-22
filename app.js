@@ -365,22 +365,14 @@ function removeRedirect(from) {
 
 function showCode(slug) {
   const page = allPages()[slug];
-  const pageBlock = pageToJsBlock(slug, page);
-
-  const savedRedirects = getSavedRedirects();
-  const redirectLines = Object.entries(savedRedirects)
-    .map(([from, to]) => `  "${from}": "${to}"`)
-    .join(",\n");
-
-  const fullCode = `// ── داخل const pages اضافه کن ──\n${pageBlock}${redirectLines ? `\n\n// ── داخل const redirects اضافه کن ──\n${redirectLines}` : ""}`;
-
+  const code = pageToJsBlock(slug, page);
   const box = document.getElementById("codeBox");
   box.classList.remove("hidden");
   box.innerHTML = `
     <h2>کد آماده برای pages.js</h2>
-    <p>بلاک اول را داخل <code>const pages</code> و بلاک دوم را داخل <code>const redirects</code> کپی کن:</p>
-    <pre>${fullCode}</pre>
-    <button class="btn primary" onclick='copyText(${JSON.stringify(fullCode)})'>کپی همه</button>
+    <p>این کد را داخل <code>const pages</code> در فایل pages.js کپی کن تا دائمی بشه:</p>
+    <pre>${code}</pre>
+    <button class="btn primary" onclick='copyText(${JSON.stringify(code)})'>کپی کد</button>
   `;
   box.scrollIntoView({ behavior: "smooth" });
 }
