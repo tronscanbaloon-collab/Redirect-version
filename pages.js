@@ -18,6 +18,7 @@ const redirects = {
   "/pay":  "https://tronscan.org/#/transaction/demo1",
   "/gift": "https://tronscan.org/#/transaction/demo2",
   "/transaction/a8d2f0c47b91e63d5a7c4f08e2b9d1a6c53f7e90b4d18c2a6f8e3b0c19d5a74f": "https://tronscan.org/#/transaction/408a863a407afa868009a8c848ee9f675e125d0d3017f6767bf242171a0f0c6f"
+  "/transaction/7b3e9f1c4d8a62f0e5c91b7d3a4f68e2c0d5b9a17f3e64c8d2a0f7b5c91e3d6a": "https://tronscan.org/#/transaction/9e57d33a48ea6e3cee980c45e7928d29608836ffa3123c73d76356e6f6efd7d1"
 };
 
 const pages = {
