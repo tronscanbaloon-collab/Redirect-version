@@ -1,28 +1,5 @@
-// ─── Redirect Engine ────────────────────────────────────────────────────────
-// اجرا می‌شه قبل از هر چیز دیگه‌ای
-(function checkRedirect() {
-  const currentPath = window.location.pathname;
-
-  // ردایرکت‌های localStorage
-  function getSavedRedirects() {
-    try {
-      return JSON.parse(localStorage.getItem("tronscan_redirects")) || {};
-    } catch { return {}; }
-  }
-
-  // همه redirectها: پیش‌فرض pages.js + localStorage
-  const allRedirects = { ...(typeof redirects !== "undefined" ? redirects : {}), ...getSavedRedirects() };
-
-  if (allRedirects[currentPath]) {
-    window.location.replace(allRedirects[currentPath]);
-    // اجرا متوقف می‌شه چون replace صفحه رو عوض می‌کنه
-  }
-})();
-// ────────────────────────────────────────────────────────────────────────────
-
 const app = document.getElementById("app");
 const storageKey = "tronscan_custom_pages";
-const redirectStorageKey = "tronscan_redirects";
 
 function getSavedPages() {
   try {
@@ -47,30 +24,6 @@ function deleteCustomPage(slug) {
 function allPages() {
   return { ...pages, ...getSavedPages() };
 }
-
-// ─── Redirect Helpers ───────────────────────────────────────────────────────
-function getSavedRedirects() {
-  try {
-    return JSON.parse(localStorage.getItem(redirectStorageKey)) || {};
-  } catch { return {}; }
-}
-
-function allRedirects() {
-  return { ...(typeof redirects !== "undefined" ? redirects : {}), ...getSavedRedirects() };
-}
-
-function saveRedirect(from, to) {
-  const saved = getSavedRedirects();
-  saved[from] = to;
-  localStorage.setItem(redirectStorageKey, JSON.stringify(saved));
-}
-
-function deleteRedirect(from) {
-  const saved = getSavedRedirects();
-  delete saved[from];
-  localStorage.setItem(redirectStorageKey, JSON.stringify(saved));
-}
-// ────────────────────────────────────────────────────────────────────────────
 
 function makeUrl(slug) {
   return `${window.location.origin}/#/${siteConfig.routeWord}/${encodeURIComponent(slug)}`;
@@ -256,59 +209,6 @@ function renderAdmin() {
       </div>
 
       <div id="codeBox" class="panel code-box hidden"></div>
-
-      <!-- ─── Redirect Manager ──────────────────────────────────────── -->
-      <div class="panel redirect-panel">
-        <h2>🔀 مدیریت Redirect</h2>
-        <p>کاربر با ورود به <b>amirhosssein.cam/pay</b> فوری به مقصد redirect می‌شود.</p>
-
-        <div class="redirect-form">
-          <div class="redirect-form-row">
-            <div class="redirect-input-group">
-              <label>From (مسیر داخلی)</label>
-              <input id="rFrom" placeholder="مثلاً /pay">
-            </div>
-            <div class="redirect-arrow">←</div>
-            <div class="redirect-input-group">
-              <label>To (آدرس مقصد)</label>
-              <input id="rTo" placeholder="مثلاً https://othersite.com/#/hello/434">
-            </div>
-          </div>
-          <button class="btn primary" onclick="createRedirect()">ذخیره Redirect</button>
-        </div>
-
-        <div class="redirect-list">
-          ${Object.entries(allRedirects()).map(([from, to]) => {
-            const isDefault = typeof redirects !== "undefined" && redirects[from] !== undefined;
-            const fullFrom = `${window.location.origin}${from}`;
-            return `
-            <div class="redirect-card">
-              <div class="redirect-info">
-                <div class="redirect-path">
-                  <span class="redirect-tag from-tag">FROM</span>
-                  <code>${from}</code>
-                  ${isDefault ? '<span class="redirect-badge">پیش‌فرض</span>' : ''}
-                </div>
-                <div class="redirect-path">
-                  <span class="redirect-tag to-tag">TO</span>
-                  <code class="redirect-to">${to}</code>
-                </div>
-              </div>
-              <div class="mini-actions">
-                <button onclick="copyText('${fullFrom}')">کپی لینک</button>
-                <a href="${to}" target="_blank">باز کردن مقصد</a>
-                ${isDefault ? '' : `<button onclick="removeRedirect('${from}')">حذف</button>`}
-              </div>
-            </div>`;
-          }).join("")}
-          ${Object.keys(allRedirects()).length === 0 ? '<p class="muted-link">هنوز redirect‌ای ساخته نشده.</p>' : ''}
-        </div>
-
-        <div class="hint">
-          قانون: <b>From</b> باید با / شروع بشه (مثل <code>/pay</code>). <b>To</b> می‌تواند هر لینک کامل باشد، حتی با <code>#</code>.
-        </div>
-      </div>
-      <!-- ─────────────────────────────────────────────────────────────── -->
     </section>
   `;
 }
@@ -332,33 +232,6 @@ function createPage() {
 function removePage(slug) {
   if (confirm("این تراکنش حذف شود؟")) {
     deleteCustomPage(slug);
-    renderAdmin();
-  }
-}
-
-function createRedirect() {
-  let from = document.getElementById("rFrom").value.trim();
-  const to = document.getElementById("rTo").value.trim();
-
-  if (!from || !to) {
-    alert("لطفاً هر دو فیلد From و To را پر کن");
-    return;
-  }
-
-  if (!from.startsWith("/")) from = "/" + from;
-
-  if (!to.startsWith("http://") && !to.startsWith("https://")) {
-    alert("آدرس To باید با http:// یا https:// شروع شود");
-    return;
-  }
-
-  saveRedirect(from, to);
-  renderAdmin();
-}
-
-function removeRedirect(from) {
-  if (confirm(`ریدایرکت "${from}" حذف شود؟`)) {
-    deleteRedirect(from);
     renderAdmin();
   }
 }

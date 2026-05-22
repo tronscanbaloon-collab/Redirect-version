@@ -1,10 +1,3 @@
-// ریدایرکت‌های پیش‌فرض (دائمی، داخل کد)
-// From: مسیر داخلی مثل /pay  |  To: هر لینک کامل، حتی با #
-const redirects = {
-  "/pay": "https://othersite.com/#/hello/434",
-  "/gift": "https://google.com"
-};
-
 const siteConfig = {
   siteName: "TRONSCAN",
   routeWord: "transaction",
