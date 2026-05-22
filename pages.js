@@ -1,40 +1,24 @@
-// =============================================
-//  TRONSCAN - تنظیمات اصلی سایت
-// =============================================
-
 const siteConfig = {
   siteName: "TRONSCAN",
   routeWord: "transaction",
   adminPassword: "123456",
-
   preview: {
     title: "TRONSCAN | TRON BlockChain Explorer",
     description: "TRONSCAN is the first blockchain browser in the tron community. It supports multiple login methods and provides a complete browsing and search experience.",
     image: "https://static.tronscan.org/production/logo/share_logo.png"
   },
-
   landing: {
     badge: "TRON Network",
     title: "TRONSCAN",
-    subtitle: "ساخت و مدیریت لینک‌های تراکنش TRX در چند ثانیه.",
-    buttonText: "ورود به پنل ادمین"
+    subtitle: "ساخت و مدیریت لینک‌های تراکنش TRX در چند ثانیه."
   }
 };
 
-// =============================================
-//  Redirectهای پیش‌فرض (دائمی)
-//  ⚠️ بعد از هر تغییر اینجا، همان مقادیر را
-//  در اسکریپت inline داخل index.html هم آپدیت کن
-//  تا redirect فوری کار کند.
-// =============================================
 const redirects = {
   "/pay":  "https://tronscan.org/#/transaction/demo1",
   "/gift": "https://tronscan.org/#/transaction/demo2"
 };
 
-// =============================================
-//  صفحات تراکنش
-// =============================================
 const pages = {
   "b7e9c4d12a6f83e0d5b91c7a4f0e6d2398c15ab63fe70d42c9b8a1e35f6d0c94": {
     title: "TRONSCAN | TRON BlockChain Explorer",

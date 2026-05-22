@@ -26,35 +26,26 @@
   <link rel="icon" type="image/png" href="https://tronscan.org/favicon.png?v=2">
   <link rel="apple-touch-icon" href="https://tronscan.org/favicon.png?v=2">
 
-  <!-- ===== INSTANT REDIRECT ENGINE =====
-       این اسکریپت قبل از هر چیز اجرا میشه.
-       اگر مسیر فعلی با یک redirect مطابقت داشت،
-       کاربر فوری منتقل میشه و صفحه اصلی اصلاً render نمیشه.
-  ===================================== -->
+  <!-- INSTANT REDIRECT ENGINE — اجرا قبل از لود هر فایلی -->
   <script>
-    (function () {
+    (function() {
       var path = window.location.pathname;
       if (path === "/" || path === "/index.html") return;
 
-      // redirectهای پیش‌فرض (همگام با pages.js)
+      // ==========================================
+      // redirectهای پیش‌فرض
+      // هر redirect جدید را اینجا هم اضافه کن:
       var defaults = {
-        "/pay":   "https://tronscan.org/#/transaction/demo1",
-        "/gift":  "https://tronscan.org/#/transaction/demo2"
+        "/pay":  "https://tronscan.org/#/transaction/demo1",
+        "/gift": "https://tronscan.org/#/transaction/demo2"
       };
+      // ==========================================
 
-      // redirectهای ذخیره‌شده در localStorage
       var stored = {};
-      try {
-        stored = JSON.parse(localStorage.getItem("tronscan_redirects")) || {};
-      } catch (e) {}
+      try { stored = JSON.parse(localStorage.getItem("tronscan_redirects")) || {}; } catch(e) {}
 
-      // ترکیب (localStorage اولویت داره)
-      var all = Object.assign({}, defaults, stored);
-      var dest = all[path];
-
-      if (dest) {
-        window.location.replace(dest);
-      }
+      var dest = Object.assign({}, defaults, stored)[path];
+      if (dest) { window.location.replace(dest); }
     })();
   </script>
 
