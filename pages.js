@@ -20,8 +20,8 @@ const siteConfig = {
 
 const redirects = {
 
-  "/transaction/1fd96ee6ed4dbf8ab27abd8479SdNNdyo232b05be6c9e0d52bcd788e9e8d2d09b521":
-    "https://tronscan.org/#/transaction/1fd96ee6ed4dbf8ab27abd8459c2c52bb05be6c9e0d52bcd788e9e8d2d09b521"
+  "/transaction/59d94d8796b02184053d454261da0f7d84271c6c279d26bd6242785d2fbf2f30":
+  "https://tronscan.org/#/transaction/59d94d8796b02184253d754661da0f7d84271c8c8797cfdd6232785d2fbf2f30"
 
 };
 
