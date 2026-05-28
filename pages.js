@@ -29,8 +29,8 @@ const redirects = {
   "/transaction/b91e7c24a4f86d5e3c7281fa90bd63ce1f57a8d9bc3e4f2068da91cb7e45f2a0":
   "https://tronscan.org/#/transaction/47c39589f1687f3d7e27962cc08a32ce7ce1e69ece2e2edd5492309e8adcb5d1",
 
-  "/transaction/50d858e0985ecc7f60418aaf0cc5ab587f42c2570a884095a9e8ccacd0f6545c":
-  "https://tronscan.org/#/transaction/cb057e626ec832177d0a266f7ae85ba0f989ae4f03de7929c16ee35feba5463d"
+  "/transaction/7f9c2ab4e8Yfd8f4d71c6a3b92de5f0178ac4d9e6b31f2a0c5b8d7e4f1a9c6b3d2e":
+  "https://tronscan.org/#/transaction/3c8b260548caa107e93d6bf313c496b0c4c3f2d82c567253b85b63284a75abc4"
 
 };
 
